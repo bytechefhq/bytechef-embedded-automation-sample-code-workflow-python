@@ -44,8 +44,7 @@ project: "ProjectDefinition" = {
             "name": "greetOnRequest",
             "label": "Greet on Request",
             "description": "Answers a request with a greeting.",
-            # A catalog workflow is only reachable through the embedded public endpoints when it declares a
-            # request trigger or an app-event trigger. Without one the import still succeeds, with a warning.
+            # A request trigger makes the workflow callable through the embedded public endpoints.
             "triggers": [{"name": "request", "type": "request/v1/autoRespondWithHTTP200"}],
             "outputs": [{"name": "greeting", "task": "greet"}],
             "tasks": [

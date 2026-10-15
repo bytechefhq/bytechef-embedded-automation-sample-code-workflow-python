@@ -10,10 +10,10 @@ definition a plain dict and keep it last: anything after it, or a `main()` wrapp
 
 A catalog project is an ordinary automation code project - the same format the automation `ProjectHandler` path
 parses - imported under Embedded → **Automations** (the Automation Workflows page) instead of Automation → Projects.
-Importing publishes it to the embedded catalog straight away. A catalog workflow is only invocable through the embedded
-public endpoints when it declares a **request** trigger or an **app-event** (`appEvent/newEvent`) trigger; a workflow
-without one still imports, but the import returns a warning for it (the UI keeps the dialog open and shows the
-warning).
+Importing publishes it to the embedded catalog straight away. A catalog workflow is called through the embedded public
+endpoints by its **request** or **app-event** (`appEvent/newEvent`) trigger, or runs on its own when a component
+trigger such as Gmail **New Email** starts it. A workflow with no trigger that can start it - none, or only a manual
+one - still imports, but the import returns a warning for it (the UI keeps the dialog open and shows the warning).
 
 The project, "Sample Catalog Code Project Python", has three workflows:
 
@@ -21,8 +21,7 @@ The project, "Sample Catalog Code Project Python", has three workflows:
   returns a greeting, and exposes that as the `greeting` output.
 - `summarizeNewEmail`, started by the Gmail **New Email** polling trigger (`googleMail/v1/newEmailPolling`). It runs
   once for every new email in the connected user's inbox and returns a one-line summary as the `summary` output. It
-  declares no request or app-event trigger, so the import warns about it; it needs no call - once provisioned and
-  enabled it runs whenever an email arrives.
+  has no request trigger, so it needs no call - once provisioned and enabled it runs whenever an email arrives.
 - `fetchRecentEmails`, started by a `request/v1/awaitWorkflowAndRespond` trigger. Its `fetchEmails` task calls the Gmail
   **Search Email** action and returns the matching messages as the `emails` output. The optional request body
   `{"from": "...", "maxResults": 5}` narrows the search.
