@@ -1,12 +1,12 @@
 # bytechef-embedded-automation-sample-code-workflow-python
 
 A sample ByteChef **embedded catalog code project** written in Python. The whole project is one file,
-[`src/sample_catalog_code_project.py`](src/sample_catalog_code_project.py), and that file is what you deploy - there
-is no build step. The file is a single Python script. The server runs it with GraalPy and reads the value of its
-**last expression**: the script defines each task's `perform` function with `def`, builds the project as a plain
-`dict` assigned to `project`, and ends with `project` alone on the last line. The server reads the dict's `name`,
-`description`, `version` and `workflows`, then calls each task's `perform(context)` when the workflow runs. Keep the
-definition a plain dict and keep it last: anything after it, or a `main()` wrapper, hides the dict from the server.
+[`src/sample_catalog_code_project.py`](src/sample_catalog_code_project.py), and that file is what you deploy - there is
+no build step. The file is a single Python script. The server runs it with GraalPy and reads the value of its **last
+expression**: the script defines each task's `perform` function with `def`, builds the project as a plain `dict`
+assigned to `project`, and ends with `project` alone on the last line. The server reads the dict's `name`,
+`description`, `version` and `workflows`, then calls each task's `perform(input, context)` when the workflow runs. Keep
+the definition a plain dict and keep it last: anything after it, or a `main()` wrapper, hides the dict from the server.
 
 A catalog project is an ordinary automation code project - the same format the automation `ProjectHandler` path
 parses - imported under Embedded → **Automations** (the Automation Workflows page) instead of Automation → Projects.
@@ -36,7 +36,7 @@ The project, "Sample Catalog Code Project Python", has four workflows:
 A task names the connections it uses and calls a component action through one of them:
 
 ```python
-def fetch_emails(context: "TaskContext") -> Any:
+def fetch_emails(input: Dict[str, Any], context: "TaskContext") -> Any:
     return context.component.googleMail.searchEmail({"maxResults": 10}, "gmail")
 
 # in the task definition:
@@ -52,12 +52,12 @@ one. A user with no Gmail connection gets the reference created disabled and a `
 
 ## Types
 
-The keys are the same camelCase keys as in a JavaScript code project. To have a type checker catch a missing `name`
-or a misspelled `perform`, the file is annotated with the types from the
-[`bytechef-workflow-api`](https://pypi.org/project/bytechef-workflow-api/) package: `project: "ProjectDefinition"`
-and `def greet(context: "TaskContext") -> str`. The ByteChef runtime can't import that package, so the file imports
-it only under `typing.TYPE_CHECKING` and quotes the annotations; at run time the import is skipped. Standard-library
-imports are fine; nothing else is available on the server.
+The keys are the same camelCase keys as in a JavaScript code project. To have a type checker catch a missing `name` or a
+misspelled `perform`, the file is annotated with the types from the
+[`bytechef-workflow-api`](https://pypi.org/project/bytechef-workflow-api/) package: `project: "ProjectDefinition"` and
+`def greet(input: Dict[str, Any], context: "TaskContext") -> str`. The ByteChef runtime can't import that package, so
+the file imports it only under `typing.TYPE_CHECKING` and quotes the annotations; at run time the import is skipped.
+Standard-library imports are fine; nothing else is available on the server.
 
 ## Check
 
