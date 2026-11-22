@@ -15,7 +15,7 @@ endpoints by its **request** or **app-event** (`appEvent/newEvent`) trigger, or 
 trigger such as Gmail **New Email** starts it. A workflow with no trigger that can start it - none, or only a manual
 one - still imports, but the import returns a warning for it (the UI keeps the dialog open and shows the warning).
 
-The project, "Sample Catalog Code Project Python", has four workflows:
+The project, "Sample Catalog Code Project Python", has five workflows:
 
 - `greetOnRequest`, started by a `request/v1/autoRespondWithHTTP200` trigger. It runs one task, `greet`, that logs and
   returns a greeting, and exposes that as the `greeting` output.
@@ -30,6 +30,29 @@ The project, "Sample Catalog Code Project Python", has four workflows:
   from the Slack workspace's channels. Its `postToSlack` task calls the Slack **Send Channel Message** action, so it
   declares a `slack` connection and passes its name. Provisioning binds it to one of the connected user's Slack
   connections; a user with none gets the reference created disabled and a `409` naming `slack`.
+- `logNewEmailSender`, started by the Gmail **New Email** trigger. Its `describe` task picks the sender and
+  subject out of the new email, and its `logSender` task is a component task that runs the Logger **Info** action with
+  them, so the execution log shows one line per email.
+
+### Component tasks
+
+A task that only runs a component action, with no logic of its own, can name the action by type instead of declaring
+a `perform` function, the same way a trigger names its component:
+
+```python
+{
+    "name": "logSender",
+    "type": "logger/v1/info",
+    "parameters": {"text": "New email from ${describe.sender}: ${describe.subject}"},
+}
+```
+
+The type is `<component>/v<version>/<action>`, and `parameters` holds the action's inputs. A `${...}` expression is
+evaluated when the task runs: `"${describe}"` is the whole output of the `describe` task, `"${describe.sender}"` one of
+its fields, and text such as `"New email from ${describe.sender}: ${describe.subject}"` becomes a string with the
+values filled in. Python's own f-strings use `{...}` without the `$`, so a `${...}` in a plain string literal is left for the platform. A component task declares no connections: when its action needs one, it is bound like the
+same task's in a visual workflow. Importing the deployed project fails when the component, its version or the action does not exist
+on the server.
 
 ### Connections
 
@@ -67,7 +90,8 @@ python3 scripts/check.py src/sample_catalog_code_project.py
 
 Evaluates the file the same way the server does (runs every statement but the last, then evaluates the last
 expression), checks its shape and runs each task once with a stub context. The stub stands in for Gmail: every trigger
-output and every component action call returns a fixed sample email, and a request trigger an empty body. It needs
+output and every component action call returns a fixed sample email, and a request trigger an empty body. A component
+task prints its action type and its parameters with the `${...}` expressions filled in. It needs
 only Python 3.9 or later; there are no dependencies to install.
 
 To type check the file as well:
